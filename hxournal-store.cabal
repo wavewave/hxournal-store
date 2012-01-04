@@ -1,7 +1,7 @@
 Name:		hxournal-store
 Version:	0.0
-Synopsis:	
-Description: 	
+Synopsis:	xournal file storing database structure
+Description: 	xournal file storing database structure for hxournal program
 License: 	BSD3
 License-file:	LICENSE
 Author:		Ian-Woo Kim
@@ -25,12 +25,17 @@ Library
   ghc-options: 	-Wall -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind
   ghc-prof-options: -caf-all -auto-all
   Build-Depends: 
-                   base>4, mtl>2, directory, filepath,
-                   cmdargs
+                   base == 4.*, 
+                   mtl == 2.*, 
+                   directory, 
+                   filepath,
+                   cmdargs >= 0.7 && < 0.10, 
+                   configurator == 0.2.*
   Exposed-Modules: 
                    Database.HXournal.Store.ProgType
                    Database.HXournal.Store.Job
                    Database.HXournal.Store.Command
+                   Database.HXournal.Store.Config
   Other-Modules: 
 
  
