@@ -54,7 +54,8 @@ generateAction uuiddir xojfile = do
   setCurrentDirectory newvdir
   createDirectory "data"
   setCurrentDirectory newvdatadir
-  copyFile xojfile newvdatadir 
+  let filename_wo_dir = takeFileName xojfile 
+  copyFile xojfile (newvdatadir </> filename_wo_dir)
   xojcontent <- checkIfBinary xojfile >>= \b -> 
                   ifThenElse b (read_xojgz xojfile) (read_xournal xojfile)
 
