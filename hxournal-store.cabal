@@ -30,7 +30,8 @@ Library
                    directory, 
                    filepath,
                    cmdargs >= 0.7 && < 0.10, 
-                   configurator == 0.2.*
+                   configurator == 0.2.*, 
+                   uuid == 1.2.*
   Exposed-Modules: 
                    Database.HXournal.Store.ProgType
                    Database.HXournal.Store.Job

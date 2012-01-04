@@ -13,6 +13,7 @@ import System.FilePath
 
 data HXournalStoreConfiguration = 
        HXournalStoreConfiguration { hxournalstore_base :: FilePath } 
+  deriving (Show)
 
 emptyConfigString :: String
 emptyConfigString = "# hxournal-store configuration\n# base = \"blah\"\n"
@@ -24,7 +25,7 @@ loadConfigFile = do
     doesFileExist dothxournalstore >>= \b -> when (not b) $ do 
       writeFile dothxournalstore emptyConfigString
       threadDelay 1000000
-    config <- load [Required "$(HOME)/.hxournal"] 
+    config <- load [Required "$(HOME)/.hxournal-store"] 
     return config 
 
 getHXournalStoreConfiguration :: Config -> IO (Maybe HXournalStoreConfiguration)

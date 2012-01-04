@@ -2,13 +2,18 @@
 
 module Database.HXournal.Store.ProgType where 
 
+import System.FilePath
 import System.Console.CmdArgs
 
-data Hxournal_store = Test 
+data Hxournal_store = Add { uuidstr :: String 
+                          , xojfile :: FilePath
+                          } 
               deriving (Show,Data,Typeable)
 
-test :: Hxournal_store
-test = Test 
+add :: Hxournal_store
+add = Add { uuidstr = def &= typ "UUID" &= argPos 0 
+          , xojfile = def &= typ "FILE" &= argPos 1
+          }  
 
-mode = modes [test]
+mode = modes [add]
 
