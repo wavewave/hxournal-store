@@ -1,8 +1,12 @@
 module Database.HXournal.Store.Job where
 
+import Control.Monad
 import Data.UUID
 import Database.HXournal.Store.Config 
 import Data.Maybe
+import Text.Xournal.Parse
+
+import Application.XournalConvert.Convert.MakeSVG
 
 import System.Directory 
 import System.Exit 
@@ -46,20 +50,33 @@ generateAction uuiddir xojfile = do
   setCurrentDirectory uuiddir 
   createDirectory "v0"
   let newvdir = uuiddir </> "v0"
+      newvdatadir = newvdir </> "data"
   setCurrentDirectory newvdir
   createDirectory "data"
-  setCurrentDirectory (newvdir </> "data")
-  excode <- system $ "xournal-convert makesvg " ++ xojfile 
-  case excode of 
-    ExitFailure n -> error $ "exit failure with " ++ show n 
-    ExitSuccess -> do 
-      createDirectory (newvdir </> "page")
-      
-      setCurrentDirectory uuiddir 
-      system $ "ln -s v0 latest"
+  setCurrentDirectory newvdatadir
+  copyFile xojfile newvdatadir 
+  xojcontent <- checkIfBinary xojfile >>= \b -> 
+                  ifThenElse b (read_xojgz xojfile) (read_xournal xojfile)
+
+  pages <- makeSVGFromXournal xojcontent xojfile newvdatadir
+  let numpages = zip [1..] pages :: [(Int,String)] 
+  createDirectory (newvdir </> "page")
+  setCurrentDirectory (newvdir </> "page") 
+  forM_ numpages $ \(num,name) -> 
+    system $ "ln -s " ++ newvdatadir </> name ++ " " ++ show num ++ ".svg"
+
+  setCurrentDirectory uuiddir 
+  system $ "ln -s v0 latest"
 
 
   return () 
+
+
+  -- excode <- system $ "xournal-convert makesvg " ++ xojfile 
+
+--  case excode of 
+--    ExitFailure n -> error $ "exit failure with " ++ show n 
+--     ExitSuccess -> do 
  
 
 

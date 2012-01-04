@@ -32,7 +32,10 @@ Library
                    cmdargs >= 0.7 && < 0.10, 
                    configurator == 0.2.*, 
                    uuid == 1.2.*, 
-                   process == 1.0.*
+                   process == 1.0.*, 
+                   xournal-convert >= 0.1.0.999 && < 0.3, 
+                   xournal-types == 0.2.*, 
+                   xournal-parser >= 0.3.0.999 && < 0.4
   Exposed-Modules: 
                    Database.HXournal.Store.ProgType
                    Database.HXournal.Store.Job
