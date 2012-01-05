@@ -7,3 +7,4 @@ commandLineProcess :: Hxournal_store -> IO ()
 commandLineProcess (Add uuid file)  = do 
   putStrLn "test called"
   startAdd uuid file 
+  return ()

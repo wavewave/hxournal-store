@@ -16,22 +16,22 @@ import System.Process
 flipMaybe :: Maybe a -> b -> ( a-> b) -> b
 flipMaybe m f s = maybe f s m  
 
-startAdd :: String -> FilePath -> IO () 
+startAdd :: String -> FilePath -> IO Int
 startAdd uuidstr file = do 
     putStrLn "job started"
     mhxojstoreconf <- loadConfigFile >>= getHXournalStoreConfiguration
 
-    flipMaybe mhxojstoreconf (putStrLn "cannot parse config file") 
+    flipMaybe mhxojstoreconf (error "cannot parse config file") 
       $ \hc -> checkUUIDNCreate hc uuidstr file generateAction
 
                 
 checkUUIDNCreate :: HXournalStoreConfiguration 
                  -> String  -- ^ UUID string
                  -> FilePath -- ^ xoj file
-                 -> (FilePath -> FilePath -> IO ())
-                 -> IO ()
+                 -> (FilePath -> FilePath -> IO a)
+                 -> IO a
 checkUUIDNCreate hc uuidstr file action = do 
-    flipMaybe (fromString uuidstr) (putStrLn "not uuid") $ \uuid -> do 
+    flipMaybe (fromString uuidstr) (error "not uuid") $ \uuid -> do 
       print hc 
       putStrLn . show $ uuid   
       let base = hxournalstore_base hc
@@ -40,11 +40,11 @@ checkUUIDNCreate hc uuidstr file action = do
       b1 <- doesFileExist file 
       b <- doesDirectoryExist uuiddir
       if (not b1 || b) 
-        then putStrLn "file doesn't exist or directory exist.. please check file or use modify"
+        then error "file doesn't exist or directory exist.. please check file or use modify"
         else action uuiddir file
       
        
-generateAction :: FilePath -> FilePath -> IO ()
+generateAction :: FilePath -> FilePath -> IO Int
 generateAction uuiddir xojfile = do 
   createDirectory uuiddir 
   setCurrentDirectory uuiddir 
@@ -68,9 +68,10 @@ generateAction uuiddir xojfile = do
 
   setCurrentDirectory uuiddir 
   system $ "ln -s v0 latest"
+  system $ "ln -s " ++ ("v0" </> "data" </> filename_wo_dir) ++ " latest.xoj"
+  return (length pages)
 
 
-  return () 
 
 
   -- excode <- system $ "xournal-convert makesvg " ++ xojfile 
