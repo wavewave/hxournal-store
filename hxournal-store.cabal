@@ -1,5 +1,5 @@
 Name:		hxournal-store
-Version:	0.0
+Version:	0.1
 Synopsis:	xournal file storing database structure
 Description: 	xournal file storing database structure for hxournal program
 License: 	BSD3
@@ -34,8 +34,8 @@ Library
                    uuid == 1.2.*, 
                    process == 1.0.*, 
                    xournal-convert >= 0.1.0.999 && < 0.3, 
-                   xournal-types == 0.2.*, 
-                   xournal-parser >= 0.3.0.999 && < 0.4
+                   xournal-types == 0.3.*, 
+                   xournal-parser == 0.3.*
   Exposed-Modules: 
                    Database.HXournal.Store.ProgType
                    Database.HXournal.Store.Job
