@@ -86,8 +86,9 @@ generateAction uuiddir ver xojfile = do
       let numpages = zip [1..] pages :: [(Int,String)] 
       createDirectory (newvdir </> "page")
       setCurrentDirectory (newvdir </> "page") 
-      forM_ numpages $ \(num,name) -> 
-        system $ "ln -s " ++ newvdatadir </> name ++ " " ++ show num ++ ".svg"
+      forM_ numpages $ \(num,name) -> do
+        putStrLn $ "ln -s " ++ "../data" </> name ++ " " ++ show num ++ ".svg"
+        system $ "ln -s " ++ "../data" </> name ++ " " ++ show num ++ ".svg"
 
       setCurrentDirectory uuiddir 
       removelatestlink 
