@@ -16,7 +16,7 @@ import Control.Monad
 import Data.UUID
 import Database.HXournal.Store.Config 
 import Data.Maybe
-import Text.Xournal.Parse
+import Text.Xournal.Parse.Enumerator 
 import Application.XournalConvert.Convert.MakeSVG
 import System.Directory 
 import System.Exit 
@@ -33,7 +33,7 @@ flipMaybe m f s = maybe f s m
 
 startAdd :: String -> FilePath -> IO Int
 startAdd uuidstr file = do 
-    -- putStrLn "job started"
+    putStrLn "in startAdd"
     mhxojstoreconf <- loadConfigFile >>= getHXournalStoreConfiguration
     flipMaybe mhxojstoreconf (error "cannot parse config file") 
       $ \hc -> checkUUIDNUpdate hc uuidstr 0 file generateAction
@@ -80,36 +80,43 @@ checkUUIDNUpdate hc uuidstr ver file action = do
 
 generateAction :: FilePath -> Int -> FilePath -> IO Int
 generateAction uuiddir ver xojfile = do 
+  putStrLn "in generateAction"
   let verstr = "v" ++ show ver 
-  -- createDirectory uuiddir 
   setCurrentDirectory uuiddir 
   b <- doesDirectoryExist verstr
   if (not b) 
     then do 
       createDirectory verstr 
-      let newvdir = uuiddir </> verstr -- "v0"
+      let newvdir = uuiddir </> verstr
           newvdatadir = newvdir </> "data"
       setCurrentDirectory newvdir
       createDirectory "data"
       setCurrentDirectory newvdatadir
       let filename_wo_dir = takeFileName xojfile 
       copyFile xojfile (newvdatadir </> filename_wo_dir)
-      xojcontent <- checkIfBinary xojfile >>= \b -> 
-                      ifThenElse b (read_xojgz xojfile) (read_xournal xojfile)
-      pages <- makeSVGFromXournal xojcontent xojfile newvdatadir
-      let numpages = zip [1..] pages :: [(Int,String)] 
-      createDirectory (newvdir </> "page")
-      setCurrentDirectory (newvdir </> "page") 
-      forM_ numpages $ \(num,name) -> do
-        putStrLn $ "ln -s " ++ "../data" </> name ++ " " ++ show num ++ ".svg"
-        system $ "ln -s " ++ "../data" </> name ++ " " ++ show num ++ ".svg"
-      -- 
-      setCurrentDirectory uuiddir 
-      removelatestlink 
-      -- 
-      system $ "ln -s " ++ verstr ++ " latest"
-      system $ "ln -s " ++ (verstr  </> "data" </> filename_wo_dir) ++ " latest.xoj"
-      return (length pages)
+      exojcontent <- checkIfBinary xojfile >>= \b -> 
+                      ifThenElse b (parseXojGzFile xojfile) (parseXournal xojfile)
+                     -- (read_xojgz xojfile) (read_xournal xojfile)
+      case exojcontent of 
+        Left err -> do putStrLn err
+                       error "err"
+        Right xojcontent -> do 
+          putStrLn " before makeSVGFromXournal"
+          pages <- makeSVGFromXournal xojcontent xojfile newvdatadir
+          putStrLn " after makeSVGFromXournal"
+          let numpages = zip [1..] pages :: [(Int,String)] 
+          createDirectory (newvdir </> "page")
+          setCurrentDirectory (newvdir </> "page") 
+          forM_ numpages $ \(num,name) -> do
+            putStrLn $ "ln -s " ++ "../data" </> name ++ " " ++ show num ++ ".svg"
+            system $ "ln -s " ++ "../data" </> name ++ " " ++ show num ++ ".svg"
+          -- 
+          setCurrentDirectory uuiddir 
+          removelatestlink 
+          -- 
+          system $ "ln -s " ++ verstr ++ " latest"
+          system $ "ln -s " ++ (verstr  </> "data" </> filename_wo_dir) ++ " latest.xoj"
+          return (length pages)
     else error $ "directory " ++ verstr ++ " exist"
       
 -- | 
